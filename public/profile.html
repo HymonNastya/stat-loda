@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <title>Профіль користувача</title>
+  <style>
+    /* Загальний стиль */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0; padding: 0;
+      background: linear-gradient(135deg, #4facfe, #00f2fe);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: fadeIn 1s ease-in;
+      padding-bottom: 140px; /* для футера */
+    }
+
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(20px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+
+    /* Хедер */
+    header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 24px;
+      background: rgba(255,255,255,0.12);
+      backdrop-filter: blur(6px);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    header input[type="text"] {
+      padding: 10px 18px;
+      border-radius: 30px;
+      border: none;
+      outline: none;
+      font-size: 1rem;
+      width: 280px;
+      max-width: 60vw;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      color: #333;
+      background-color: #fff;
+      transition: box-shadow 0.3s ease;
+    }
+    header input[type="text"]::placeholder {
+      color: #aaa;
+    }
+    header input[type="text"]:focus {
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      background-color: #fff;
+    }
+    header button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 24px;
+      color: white;
+      transition: color 0.3s ease;
+    }
+    header button:hover {
+      color: #ffff99;
+    }
+    /* Аватар і меню профілю */
+    #profileMenuWrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    #profileAvatarLink img {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2px solid white;
+      cursor: pointer;
+      transition: box-shadow 0.3s ease;
+      display: block;
+    }
+    #profileAvatarLink img:hover {
+      box-shadow: 0 0 10px 2px #ffff99;
+    }
+    /* Випадаюче меню */
+    #dropdownMenu {
+      position: absolute;
+      top: 44px;
+      right: 0;
+      background: rgba(255,255,255,0.95);
+      color: #333;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      min-width: 160px;
+      font-weight: 600;
+      z-index: 200;
+
+      opacity: 0;
+      transform: translateY(-10px);
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+    #dropdownMenu.show {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    #dropdownMenu a {
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 16px;
+      text-decoration:none;
+      color:#333;
+      border-bottom: 1px solid #ddd;
+      user-select:none;
+    }
+    #dropdownMenu a:last-child {
+      border-bottom: none;
+    }
+    #dropdownMenu a:hover {
+      background-color: #ffff99;
+      color: #333;
+    }
+    /* SVG іконки у меню */
+    #dropdownMenu svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+      flex-shrink: 0;
+    }
+
+    /* Навігація */
+    nav {
+      margin: 20px 0 10px;
+      background-color: rgba(255, 255, 255, 0.12);
+      padding: 10px 24px;
+      border-radius: 12px;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+      width: 90%;
+      max-width: 900px;
+      display: flex;
+      justify-content: center;
+      gap: 28px;
+    }
+    nav a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1.1rem;
+      padding: 6px 12px;
+      border-radius: 8px;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    nav a:hover, nav a.active {
+      background-color: #ffff99;
+      color: #333;
+    }
+
+    /* Заголовок */
+    h1 {
+      margin-bottom: 30px;
+      font-size: 2.5rem;
+      text-align: center;
+      animation: slideDown 0.8s ease-out;
+    }
+    @keyframes slideDown {
+      from { transform: translateY(-30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Контейнер профілю */
+    .profile-container {
+      width: 90%;
+      max-width: 900px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 16px;
+      padding: 30px 40px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      backdrop-filter: blur(6px);
+      animation: fadeIn 1s ease-in;
+      color: #222;
+    }
+
+    /* Інформація профілю */
+    .profile-info {
+      display: flex;
+      gap: 40px;
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+
+    .avatar-section {
+      flex: 0 0 150px;
+      text-align: center;
+    }
+    .avatar-section img {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      border: 4px solid #4facfe;
+      object-fit: cover;
+      margin-bottom: 12px;
+      box-shadow: 0 0 15px #00f2fe;
+    }
+    .avatar-section input[type="file"] {
+      display: none;
+    }
+    .avatar-label {
+      display: inline-block;
+      cursor: pointer;
+      color: #0077ff;
+      font-weight: 600;
+      font-size: 0.9rem;
+      user-select: none;
+      text-decoration: underline;
+    }
+    .avatar-label:hover {
+      color: #004999;
+    }
+
+    .details-section {
+      flex: 1 1 auto;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: #004999;
+    }
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="password"],
+    select {
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid #bbb;
+      font-size: 1rem;
+      width: 100%;
+      box-sizing: border-box;
+      transition: border-color 0.3s ease;
+    }
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="tel"]:focus,
+    input[type="password"]:focus,
+    select:focus {
+      border-color: #4facfe;
+      outline: none;
+      box-shadow: 0 0 8px #4facfe;
+    }
+
+    button.save-btn {
+      align-self: flex-start;
+      background-color: #4facfe;
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      font-weight: 700;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      box-shadow: 0 0 10px #00f2fe;
+    }
+    button.save-btn:hover {
+      background-color: #00f2fe;
+    }
+
+    /* Адаптив */
+    @media (max-width: 720px) {
+      .profile-info {
+        flex-direction: column;
+        align-items: center;
+      }
+      .avatar-section {
+        flex: none;
+        margin-bottom: 30px;
+      }
+      nav {
+        flex-wrap: wrap;
+        gap: 16px;
+      }
+    }
+
+    /* Тема темна */
+    .dark-theme {
+      background: #111;
+      color: #eee;
+    }
+    .dark-theme .profile-container {
+      background: rgba(255,255,255,0.05);
+      color: #ddd;
+      box-shadow: 0 8px 20px rgba(0, 255, 255, 0.3);
+    }
+    .dark-theme label {
+      color: #70d6ff;
+    }
+    .dark-theme input, 
+    .dark-theme select {
+      background: #222;
+      color: #eee;
+      border-color: #4facfe;
+    }
+    .dark-theme input::placeholder {
+      color: #a0cfff;
+    }
+    .dark-theme button.save-btn {
+      background-color: #00f2fe;
+      color: #111;
+      box-shadow: 0 0 15px #00f2fe;
+    }
+    .dark-theme nav {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+    .dark-theme nav a.active, 
+    .dark-theme nav a:hover {
+      background-color: #00f2fe;
+      color: #111;
+    }
+    .dark-theme header {
+      background-color: rgba(255,255,255,0.05);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <input type="text" placeholder="Пошук..." />
+    <div id="profileMenuWrapper">
+      <button id="themeToggle" title="Змінити тему">🌓</button>
+      <a href="#" id="profileAvatarLink" title="Меню профілю" style="margin-left: 12px;">
+        <img src="https://cdn-icons-png.flaticon.com/512/1077/1077063.png" alt="Профіль" />
+      </a>
+      <div id="dropdownMenu">
+        <a href="C:\Users\user\Desktop\stat_main\public\register.html" tabindex="0">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M8 7a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M14 14s-1-1.5-6-1.5S2 14 2 14s1 0 6 0 6 0 6 0z"/></svg>
+          Зареєструватися
+        </a>
+        <a href="C:\Users\user\Desktop\stat_main\public\login.html" tabindex="0">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M10 12a.5.5 0 0 1-.5-.5V9H4.5a.5.5 0 0 1 0-1H9.5V4.5a.5.5 0 0 1 1 0V8a2 2 0 0 1-2 2h-1v1.5a.5.5 0 0 1-.5.5z"/></svg>
+          Увійти
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <nav>
+    <a href="C:\Users\user\Desktop\stat_main\public\communities.html">Головна</a>
+    <a href="C:\Users\user\Desktop\stat_main\public\districts.html">Райони</a>
+    <a href="C:\Users\user\Desktop\stat_main\public\districts.html">Громади</a>
+    <a href="C:\Users\user\Desktop\stat_main\public\datasets.html">Набори даних</a>
+    <a href="C:\Users\user\Desktop\stat_main\public\news.html">Новини</a>
+  </nav>
+
+  <h1>Мій профіль</h1>
+
+  <div class="profile-container">
+    <div class="profile-info">
+      <div class="avatar-section">
+        <img id="avatarPreview" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Аватар" />
+        <label for="avatarInput" class="avatar-label">Змінити фото</label>
+        <input type="file" id="avatarInput" accept="image/*" />
+      </div>
+      <div class="details-section">
+        <form id="profileForm">
+          <label for="fullName">Повне ім’я</label>
+          <input type="text" id="fullName" name="fullName" placeholder="Іван Іваненко" required />
+
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" placeholder="ivan@example.com" required />
+
+          <label for="phone">Телефон</label>
+          <input type="tel" id="phone" name="phone" placeholder="+380 00 000 0000" />
+
+          <label for="location">Місто</label>
+          <input type="text" id="location" name="location" placeholder="Львів" />
+
+          <label for="role">Роль</label>
+          <select id="role" name="role">
+            <option value="user" selected>Користувач</option>
+            <option value="admin">Адміністратор</option>
+            <option value="manager">Менеджер</option>
+          </select>
+
+          <label for="password">Змінити пароль</label>
+          <input type="password" id="password" name="password" placeholder="Новий пароль" />
+
+          <button type="submit" class="save-btn">Зберегти зміни</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <footer style="margin-top: auto; width: 100%; text-align: center; padding: 18px 24px; font-size: 0.85rem; color: white; user-select:none; background: rgba(0,0,0,0.15);">
+    © 2025 Твій проект | Контакти: <a href="mailto:thedigital@loda.gov.ua" style="color:#ffff99;">thedigital@loda.gov.ua</a>
+  </footer>
+
+  <script>
+    // Попередній перегляд аватару
+    const avatarInput = document.getElementById('avatarInput');
+    const avatarPreview = document.getElementById('avatarPreview');
+
+    avatarInput.addEventListener('change', () => {
+      const file = avatarInput.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = e => avatarPreview.src = e.target.result;
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Обробка сабміту форми
+    const form = document.getElementById('profileForm');
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      // Тут може бути код для відправки даних на сервер через fetch/AJAX
+
+      alert('Зміни збережено!');
+    });
+
+    // Тема (темна/світла)
+    const toggle = document.getElementById('themeToggle');
+    toggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark-theme');
+      localStorage.setItem('theme', document.body.classList.contains('dark-theme') ? 'dark' : 'light');
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const saved = localStorage.getItem('theme');
+      if (saved === 'dark') document.body.classList.add('dark-theme');
+    });
+
+    // Випадаюче меню профілю
+    const profileWrapper = document.getElementById('profileMenuWrapper');
+    const dropdownMenu = document.getElementById('dropdownMenu');
+    const avatarLink = document.getElementById('profileAvatarLink');
+
+    function toggleMenu() {
+      const isVisible = dropdownMenu.classList.contains('show');
+      if (isVisible) {
+        dropdownMenu.classList.remove('show');
+      } else {
+        dropdownMenu.classList.add('show');
+      }
+    }
+
+    avatarLink.addEventListener('click', e => {
+      e.preventDefault();
+      toggleMenu();
+    });
+
+    // Закрити меню при кліку поза ним
+    document.addEventListener('click', (e) => {
+      if (!profileWrapper.contains(e.target)) {
+        dropdownMenu.classList.remove('show');
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <title>Громади</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #43cea2, #185a9d);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: fadeIn 1s ease-in;
+      position: relative;
+      padding-bottom: 160px; /* для футера */
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      background-color: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(6px);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    header input[type="text"] {
+      padding: 12px 20px;
+      border-radius: 30px;
+      border: none;
+      outline: none;
+      font-size: 1rem;
+      width: 280px;
+      max-width: 60vw;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      transition: box-shadow 0.3s ease, background-color 0.3s ease;
+      color: #333;
+      background-color: #fff;
+    }
+    header input[type="text"]::placeholder {
+      color: #aaa;
+    }
+    header input[type="text"]:focus {
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      background-color: #fff;
+    }
+
+    header button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 24px;
+      color: white;
+      transition: color 0.3s ease;
+    }
+    header button:hover {
+      color: #ffd700;
+    }
+
+    header img {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2px solid white;
+      cursor: pointer;
+      transition: box-shadow 0.3s ease;
+    }
+    header img:hover {
+      box-shadow: 0 0 10px 2px #ffd700;
+    }
+
+    nav {
+      margin: 20px;
+      background-color: rgba(255, 255, 255, 0.12);
+      padding: 10px 20px;
+      border-radius: 12px;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+    }
+
+    nav a {
+      color: #fff;
+      text-decoration: none;
+      margin: 0 12px;
+      font-weight: 600;
+      transition: color 0.3s ease;
+      font-size: 1.1rem;
+    }
+
+    nav a:hover {
+      color: #ffd700;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 2.5rem;
+      text-align: center;
+      animation: slideDown 0.8s ease-out;
+    }
+
+    @keyframes slideDown {
+      from { transform: translateY(-30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    table {
+      width: 95%;
+      max-width: 1000px;
+      border-collapse: collapse;
+      margin: 20px auto 40px;
+      background-color: rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      overflow: hidden;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+      animation: fadeIn 1.2s ease-in-out;
+      color: white;
+    }
+
+    th, td {
+      padding: 14px 20px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    th {
+      background-color: rgba(255, 255, 255, 0.18);
+      font-weight: bold;
+    }
+
+    tr:hover {
+      background-color: rgba(255, 255, 255, 0.12);
+      transition: background-color 0.3s ease;
+    }
+
+    a.link {
+      color: #ffd700;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    a.link:hover {
+      text-decoration: underline;
+    }
+
+
+    #chartModal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.6);
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+    }
+
+    #chartModal .modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 600px;
+      width: 90%;
+      position: relative;
+    }
+
+    #chartModal canvas {
+      max-height: 300px;
+    }
+
+    #chartModal button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: red;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: rgba(255,255,255,0.07);
+      backdrop-filter: blur(8px);
+      padding: 18px 24px;
+      color: #ccc;
+      font-size: 0.82rem;
+      text-align: center;
+      line-height: 1.5;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.15);
+      user-select: none;
+      pointer-events: none; /* щоб не заважав клікам по сторінці */
+      z-index: 100;
+      font-style: italic;
+      max-height: 140px;
+      overflow-y: auto;
+    }
+
+    footer a {
+      color: #ffd700;
+      text-decoration: underline;
+      pointer-events: auto; /* посилання клікабельні */
+      transition: color 0.3s ease;
+    }
+    footer a:hover {
+      color: #fff;
+    }
+
+    .dark-theme {
+      background: #111;
+      color: #eee;
+    }
+
+    .dark-theme a { color: #aeeaff; }
+
+    .dark-theme header, .dark-theme nav, .dark-theme footer {
+      background-color: rgba(255,255,255,0.04);
+    }
+
+    @media (max-width: 600px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+
+      thead {
+        display: none;
+      }
+
+      td {
+        padding: 10px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        position: relative;
+      }
+
+      td::before {
+        content: attr(data-label);
+        font-weight: bold;
+        display: block;
+        margin-bottom: 5px;
+        color: #ffd700;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <input type="text" placeholder="Пошук..." />
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <button id="themeToggle" title="Змінити тему">🌓</button>
+      <a href="C:\Users\user\Desktop\stat_main\public\profile.html" title="Особистий профіль">
+        <img src="https://cdn-icons-png.flaticon.com/512/1077/1077063.png" alt="Профіль">
+      </a>
+    </div>
+  </header>
+
+  <nav>
+    <a href="C:\Users\user\Desktop\stat_main\public\communities.html">Головна</a>
+    <a href="C:\Users\user\Desktop\stat_main\public\districts.html">Райони</a>
+    <a href="C:\Users\user\Desktop\stat_main\public\districts.html">Громади</a>
+    <a href="C:\Users\user\Desktop\stat_main\public\datasets.html">Набори даних</a>
+    <a href="C:\Users\user\Desktop\stat_main\public\news.html">Новини</a>
+  </nav>
+
+  <h1>Територіальні громади</h1>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Назва</th>
+        <th>Район</th>
+        <th>Заснована</th>
+        <th>Сайт</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td data-label="Назва">
+          <a href="#" class="community-link" data-name="Старосамбірська громада">Старосамбірська громада</a>
+        </td>
+        <td data-label="Район">Самбірський</td>
+        <td data-label="Заснована">2018-10-01</td>
+        <td data-label="Сайт">
+          <a class="link" href="https://staryysambir-community.gov.ua" target="_blank">Перейти</a>
+        </td>
+      </tr>
+      <tr>
+        <td data-label="Назва">
+          <a href="#" class="community-link" data-name="Городоцька громада">Городоцька громада</a>
+        </td>
+        <td data-label="Район">Львівський</td>
+        <td data-label="Заснована">2019-07-20</td>
+        <td data-label="Сайт">
+          <a class="link" href="https://horodok-rada.gov.ua" target="_blank">Перейти</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div id="chartModal">
+    <div class="modal-content">
+      <canvas id="communityChart"></canvas>
+      <button onclick="closeChart()">×</button>
+    </div>
+  </div>
+
+  <footer>
+    <p><strong>stat.loda.gov.ua</strong></p>
+    <p>Львівська область, м. Львів, вул. В. Винниченка, 12 (2 поверх)</p>
+    <p>Телефон: <a href="tel:+380322752774" style="color:#ffd700;">+380322752774</a></p>
+    <p>Якщо ви маєте зауваження або пропозиції, будь ласка, напишіть нам: 
+      <a href="mailto:thedigital@loda.gov.ua">thedigital@loda.gov.ua</a>
+    </p>
+    <p>Слідкуйте за нами:</p>
+    <p>© Проєкт реалізований управлінням з питань цифрового розвитку Львівської ОДА в рамках програми "Цифрова Львівщина" 2022–2024</p>
+    <p>Контент ліцензовано за <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>, якщо не вказано інше.</p>
+    <p><em>При використанні матеріалів посилання на сайт обов’язкове.</em></p>
+  </footer>
+
+  <script>
+    const toggle = document.getElementById('themeToggle');
+    toggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark-theme');
+      localStorage.setItem('theme', document.body.classList.contains('dark-theme') ? 'dark' : 'light');
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const saved = localStorage.getItem('theme');
+      if (saved === 'dark') document.body.classList.add('dark-theme');
+    });
+
+    const chartModal = document.getElementById('chartModal');
+    const ctx = document.getElementById('communityChart').getContext('2d');
+    let chartInstance;
+
+    const communityData = {
+      'Старосамбірська громада': {
+        labels: ['Населення', 'Бюджет (млн грн)', 'Площа (км²)'],
+        data: [12000, 45, 230]
+      },
+      'Городоцька громада': {
+        labels: ['Населення', 'Бюджет (млн грн)', 'Площа (км²)'],
+        data: [18500, 60, 320]
+      }
+    };
+
+    document.querySelectorAll('.community-link').forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        const name = link.dataset.name;
+        const data = communityData[name];
+
+        if (chartInstance) chartInstance.destroy();
+
+        chartInstance = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: data.labels,
+            datasets: [{
+              label: name,
+              data: data.data,
+              backgroundColor: ['#4facfe', '#00f2fe', '#43cea2']
+            }]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              y: { beginAtZero: true }
+            }
+          }
+        });
+
+        chartModal.style.display = 'flex';
+      });
+    });
+
+    function closeChart() {
+      chartModal.style.display = 'none';
+    }
+  </script>
+</body>
+</html>

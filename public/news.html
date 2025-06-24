@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <title>Новини</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #ff6a00, #ee0979);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: fadeIn 1s ease-in;
+      padding-bottom: 160px; /* для футера */
+      position: relative;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      background-color: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(6px);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    header input[type="text"] {
+      padding: 12px 20px;
+      border-radius: 30px;
+      border: none;
+      outline: none;
+      font-size: 1rem;
+      width: 280px;
+      max-width: 60vw;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      transition: box-shadow 0.3s ease, background-color 0.3s ease;
+      color: #333;
+      background-color: #fff;
+    }
+    header input[type="text"]::placeholder {
+      color: #aaa;
+    }
+    header input[type="text"]:focus {
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      background-color: #fff;
+    }
+
+    header button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 24px;
+      color: white;
+      transition: color 0.3s ease;
+    }
+    header button:hover {
+      color: #ffff99;
+    }
+
+    header img {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2px solid white;
+      cursor: pointer;
+      transition: box-shadow 0.3s ease;
+    }
+    header img:hover {
+      box-shadow: 0 0 10px 2px #ffff99;
+    }
+
+    nav {
+      margin: 20px;
+      background-color: rgba(255, 255, 255, 0.12);
+      padding: 10px 20px;
+      border-radius: 12px;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+    }
+
+    nav a {
+      color: #fff;
+      text-decoration: none;
+      margin: 0 12px;
+      font-weight: 600;
+      transition: color 0.3s ease;
+      font-size: 1.1rem;
+    }
+
+    nav a:hover {
+      color: #ffff99;
+    }
+
+    h1 {
+      margin: 0 0 20px 0;
+      font-size: 2.5rem;
+      text-align: center;
+      animation: slideDown 0.8s ease-out;
+    }
+
+    @keyframes slideDown {
+      from { transform: translateY(-30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .news-container {
+      width: 95%;
+      max-width: 900px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      padding: 0 20px 40px;
+    }
+
+    .news-card {
+      background-color: rgba(255, 255, 255, 0.12);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      backdrop-filter: blur(4px);
+      transition: transform 0.3s ease, background-color 0.3s ease;
+      animation: fadeInCard 0.5s ease forwards;
+      color: white;
+    }
+
+    .news-card:hover {
+      background-color: rgba(255, 255, 255, 0.18);
+      transform: scale(1.02);
+    }
+
+    @keyframes fadeInCard {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .news-title {
+      font-size: 1.4rem;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .news-meta {
+      font-size: 0.9rem;
+      color: #ffe6e6;
+      margin-bottom: 12px;
+    }
+
+    .news-preview {
+      font-size: 1rem;
+      line-height: 1.4;
+    }
+
+    .tag {
+      background-color: #fff;
+      color: #ee0979;
+      font-weight: bold;
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border-radius: 6px;
+      margin-right: 5px;
+    }
+
+    footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: rgba(255,255,255,0.07);
+      backdrop-filter: blur(8px);
+      padding: 18px 24px;
+      color: #eee;
+      font-size: 0.85rem;
+      text-align: center;
+      line-height: 1.5;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.15);
+      user-select: none;
+      pointer-events: none;
+      z-index: 100;
+      font-style: italic;
+      max-height: 140px;
+      overflow-y: auto;
+    }
+
+    footer a {
+      color: #ffff99;
+      text-decoration: underline;
+      pointer-events: auto;
+      transition: color 0.3s ease;
+    }
+    footer a:hover {
+      color: #fff;
+    }
+
+    .dark-theme {
+      background: #111;
+      color: #eee;
+    }
+
+    .dark-theme a { color: #aeeaff; }
+
+    .dark-theme header, .dark-theme nav, .dark-theme footer {
+      background-color: rgba(255,255,255,0.04);
+    }
+
+    @media (max-width: 600px) {
+      .news-title {
+        font-size: 1.2rem;
+      }
+
+      .news-preview {
+        font-size: 0.95rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <input type="text" placeholder="Пошук..." />
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <button id="themeToggle" title="Змінити тему">🌓</button>
+      <a href="C:\Users\user\Desktop\stat_main\public\profile.html" title="Особистий профіль">
+        <img src="https://cdn-icons-png.flaticon.com/512/1077/1077063.png" alt="Профіль">
+      </a>
+    </div>
+  </header>
+
+  <nav>
+    <a href="C:\Users\user\Desktop\stat_main\public\communities.html">Головна</a>
+    <a href="C:\Users\user\Desktop\stat_main\public\districts.html">Райони</a>
+    <a href="C:\Users\user\Desktop\stat_main\public\districts.html">Громади</a>
+    <a href="C:\Users\user\Desktop\stat_main\public\datasets.html">Набори даних</a>
+    <a href="C:\Users\user\Desktop\stat_main\public\news.html">Новини</a>
+  </nav>
+
+  <h1>Останні новини</h1>
+
+  <div class="news-container">
+    <div class="news-card">
+      <div class="news-title">Городоцька громада оприлюднила бюджет на 2025 рік</div>
+      <div class="news-meta">🗓 2025-06-15 • Теги:
+        <span class="tag">Бюджет</span>
+        <span class="tag">Громада</span>
+      </div>
+      <div class="news-preview">
+        Доступний детальний фінансовий звіт з доходів та витрат громади на платформі відкритих даних.
+      </div>
+    </div>
+
+    <div class="news-card">
+      <div class="news-title">Нові дані про стан медичних закладів у Самбірському районі</div>
+      <div class="news-meta">🗓 2025-06-10 • Теги:
+        <span class="tag">Медицина</span>
+        <span class="tag">Заклади</span>
+      </div>
+      <div class="news-preview">
+        Оновлено набір даних із інформацією про медичні установи, їх керівників та координати.
+      </div>
+    </div>
+
+    <!-- Інші новини -->
+  </div>
+
+  <footer>
+    <p><strong>stat.loda.gov.ua</strong></p>
+    <p>Львівська область, м. Львів, вул. В. Винниченка, 12 (2 поверх)</p>
+    <p>Телефон: <a href="tel:+380322752774" style="color:#ffff99;">+380322752774</a></p>
+    <p>Якщо ви маєте зауваження або пропозиції, будь ласка, напишіть нам: 
+      <a href="mailto:thedigital@loda.gov.ua">thedigital@loda.gov.ua</a>
+    </p>
+    <p>Слідкуйте за нами:</p>
+    <p>© Проєкт реалізований управлінням з питань цифрового розвитку Львівської ОДА в рамках програми "Цифрова Львівщина" 2022–2024</p>
+    <p>Контент ліцензовано за <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>, якщо не вказано інше.</p>
+    <p><em>При використанні матеріалів посилання на сайт обов’язкове.</em></p>
+  </footer>
+
+  <script>
+    const toggle = document.getElementById('themeToggle');
+    toggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark-theme');
+      localStorage.setItem('theme', document.body.classList.contains('dark-theme') ? 'dark' : 'light');
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const saved = localStorage.getItem('theme');
+      if (saved === 'dark') document.body.classList.add('dark-theme');
+    });
+  </script>
+</body>
+</html>
