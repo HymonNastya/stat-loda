@@ -260,11 +260,14 @@
         color: #ffd700;
       }
     }
+
+    
+    
   </style>
 </head>
 <body>
   <header>
-    <input type="text" placeholder="Пошук..." />
+    <input type="text" placeholder="Щоб почати пошук, введіть запит тут" />
     <div style="display: flex; align-items: center; gap: 16px;">
       <button id="themeToggle" title="Змінити тему">🌓</button>
       <a href="C:\Users\user\Desktop\stat_main\public\profile.html" title="Особистий профіль">
@@ -274,11 +277,11 @@
   </header>
 
   <nav>
-    <a href="C:\Users\user\Desktop\stat_main\public\communities.html">Головна</a>
-    <a href="C:\Users\user\Desktop\stat_main\public\districts.html">Райони</a>
-    <a href="C:\Users\user\Desktop\stat_main\public\districts.html">Громади</a>
-    <a href="C:\Users\user\Desktop\stat_main\public\datasets.html">Набори даних</a>
-    <a href="C:\Users\user\Desktop\stat_main\public\news.html">Новини</a>
+    <a href="communities.html">Головна</a>
+    <a href="districts.html">Райони</a>
+    <a href="districts.html">Громади</a>
+    <a href="datasets.html">Набори даних</a>
+    <a href="news.html">Новини</a>
   </nav>
 
   <h1>Територіальні громади</h1>
@@ -292,28 +295,7 @@
         <th>Сайт</th>
       </tr>
     </thead>
-    <tbody>
-      <tr>
-        <td data-label="Назва">
-          <a href="#" class="community-link" data-name="Старосамбірська громада">Старосамбірська громада</a>
-        </td>
-        <td data-label="Район">Самбірський</td>
-        <td data-label="Заснована">2018-10-01</td>
-        <td data-label="Сайт">
-          <a class="link" href="https://staryysambir-community.gov.ua" target="_blank">Перейти</a>
-        </td>
-      </tr>
-      <tr>
-        <td data-label="Назва">
-          <a href="#" class="community-link" data-name="Городоцька громада">Городоцька громада</a>
-        </td>
-        <td data-label="Район">Львівський</td>
-        <td data-label="Заснована">2019-07-20</td>
-        <td data-label="Сайт">
-          <a class="link" href="https://horodok-rada.gov.ua" target="_blank">Перейти</a>
-        </td>
-      </tr>
-    </tbody>
+    <tbody></tbody>
   </table>
 
   <div id="chartModal">
@@ -327,75 +309,139 @@
     <p><strong>stat.loda.gov.ua</strong></p>
     <p>Львівська область, м. Львів, вул. В. Винниченка, 12 (2 поверх)</p>
     <p>Телефон: <a href="tel:+380322752774" style="color:#ffd700;">+380322752774</a></p>
-    <p>Якщо ви маєте зауваження або пропозиції, будь ласка, напишіть нам: 
-      <a href="mailto:thedigital@loda.gov.ua">thedigital@loda.gov.ua</a>
-    </p>
-    <p>Слідкуйте за нами:</p>
-    <p>© Проєкт реалізований управлінням з питань цифрового розвитку Львівської ОДА в рамках програми "Цифрова Львівщина" 2022–2024</p>
-    <p>Контент ліцензовано за <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>, якщо не вказано інше.</p>
-    <p><em>При використанні матеріалів посилання на сайт обов’язкове.</em></p>
+    <p>Зауваження або пропозиції: <a href="mailto:thedigital@loda.gov.ua">thedigital@loda.gov.ua</a></p>
+    <p>© "Цифрова Львівщина" 2022–2024</p>
+    <p>Контент ліцензовано за <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a></p>
   </footer>
 
   <script>
+    // Пошук
+    document.addEventListener('DOMContentLoaded', () => {
+      const searchInput = document.querySelector('header input[type="text"]');
+      const rows = document.querySelectorAll('tbody tr');
+      searchInput.addEventListener('input', () => {
+        const query = searchInput.value.toLowerCase();
+        rows.forEach(row => {
+          const rowText = row.textContent.toLowerCase();
+          row.style.display = rowText.includes(query) ? '' : 'none';
+        });
+      });
+    });
+  </script>
+
+  <script>
+    // Завантаження списку громад
+    document.addEventListener('DOMContentLoaded', async () => {
+      const tbody = document.querySelector('tbody');
+      tbody.innerHTML = '<tr><td colspan="4">Завантаження...</td></tr>';
+
+      try {
+        const response = await fetch('/api/communities');
+        const data = await response.json();
+
+        if (!Array.isArray(data)) throw new Error("Невірний формат даних");
+
+        tbody.innerHTML = '';
+
+        data.forEach(comm => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td data-label="Назва">
+              <a href="#" class="community-link" data-name="${comm.name}" data-id="${comm.id}">${comm.name}</a>
+            </td>
+            <td data-label="Район">${comm.district?.name || '—'}</td>
+            <td data-label="Заснована">${comm.established_date ? comm.established_date.slice(0, 10) : '—'}</td>
+            <td data-label="Сайт">
+              ${comm.website_url
+                ? `<a class="link" href="${comm.website_url}" target="_blank">Перейти</a>`
+                : '—'}
+            </td>
+          `;
+          tbody.appendChild(row);
+        });
+      } catch (err) {
+        console.error('❌ Помилка при завантаженні громад:', err);
+        tbody.innerHTML = '<tr><td colspan="4">Сталася помилка при завантаженні даних.</td></tr>';
+      }
+    });
+  </script>
+
+  <script>
+    // Темна тема
     const toggle = document.getElementById('themeToggle');
     toggle.addEventListener('click', () => {
       document.body.classList.toggle('dark-theme');
       localStorage.setItem('theme', document.body.classList.contains('dark-theme') ? 'dark' : 'light');
     });
-
     window.addEventListener('DOMContentLoaded', () => {
       const saved = localStorage.getItem('theme');
       if (saved === 'dark') document.body.classList.add('dark-theme');
     });
+  </script>
 
+  <script>
+    // Відображення графіка при натисканні на громаду
     const chartModal = document.getElementById('chartModal');
     const ctx = document.getElementById('communityChart').getContext('2d');
     let chartInstance;
 
-    const communityData = {
-      'Старосамбірська громада': {
-        labels: ['Населення', 'Бюджет (млн грн)', 'Площа (км²)'],
-        data: [12000, 45, 230]
-      },
-      'Городоцька громада': {
-        labels: ['Населення', 'Бюджет (млн грн)', 'Площа (км²)'],
-        data: [18500, 60, 320]
-      }
-    };
-
-    document.querySelectorAll('.community-link').forEach(link => {
-      link.addEventListener('click', e => {
-        e.preventDefault();
-        const name = link.dataset.name;
-        const data = communityData[name];
-
-        if (chartInstance) chartInstance.destroy();
-
-        chartInstance = new Chart(ctx, {
-          type: 'bar',
-          data: {
-            labels: data.labels,
-            datasets: [{
-              label: name,
-              data: data.data,
-              backgroundColor: ['#4facfe', '#00f2fe', '#43cea2']
-            }]
-          },
-          options: {
-            responsive: true,
-            scales: {
-              y: { beginAtZero: true }
-            }
-          }
-        });
-
-        chartModal.style.display = 'flex';
-      });
-    });
-
     function closeChart() {
       chartModal.style.display = 'none';
     }
+
+    document.addEventListener('click', async e => {
+      if (e.target.classList.contains('community-link')) {
+        e.preventDefault();
+        const link = e.target;
+        const name = link.dataset.name;
+        const id = link.dataset.id;
+
+        try {
+          const res = await fetch(`/api/community/${id}`);
+          const data = await res.json();
+
+          if (!data || !data.name) throw new Error("Дані відсутні");
+
+          if (chartInstance) chartInstance.destroy();
+
+          chartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels: ['Площа (км²)', 'К-сть міст', 'К-сть сіл', 'К-сть населених пунктів'],
+              datasets: [{
+                label: data.name,
+                data: [
+                  parseFloat(data.area_km2 || 0),
+                  data.num_cities || 0,
+                  data.num_villages || 0,
+                  data.num_settlements || 0
+                ],
+                backgroundColor: ['#4facfe', '#00f2fe', '#43cea2', '#185a9d']
+              }]
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                title: {
+                  display: true,
+                  text: `Статистика громади: ${data.name}`
+                }
+              },
+              scales: {
+                y: {
+                  beginAtZero: true
+                }
+              }
+            }
+          });
+
+          chartModal.style.display = 'flex';
+        } catch (err) {
+          console.error('Помилка при завантаженні даних громади:', err);
+          alert('Сталася помилка при завантаженні графіка.');
+        }
+      }
+    });
   </script>
 </body>
 </html>

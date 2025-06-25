@@ -229,7 +229,7 @@
 </head>
 <body>
   <header>
-    <input type="text" placeholder="Пошук..." />
+    <input type="text" placeholder="Щоб почати пошук, введіть запит тут" />
     <div style="display: flex; align-items: center; gap: 16px;">
       <button id="themeToggle" title="Змінити тему">🌓</button>
       <a href="C:\Users\user\Desktop\stat_main\public\profile.html" title="Особистий профіль">
@@ -239,11 +239,11 @@
   </header>
 
   <nav>
-    <a href="C:\Users\user\Desktop\stat_main\public\communities.html">Головна</a>
-    <a href="C:\Users\user\Desktop\stat_main\public\districts.html">Райони</a>
-    <a href="C:\Users\user\Desktop\stat_main\public\districts.html">Громади</a>
-    <a href="C:\Users\user\Desktop\stat_main\public\datasets.html">Набори даних</a>
-    <a href="C:\Users\user\Desktop\stat_main\public\news.html">Новини</a>
+    <a href="communities.html">Головна</a>
+    <a href="districts.html">Райони</a>
+    <a href="districts.html">Громади</a>
+    <a href="datasets.html">Набори даних</a>
+    <a href="news.html">Новини</a>
   </nav>
 
   <h1>Останні новини</h1>
@@ -286,6 +286,22 @@
     <p>Контент ліцензовано за <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>, якщо не вказано інше.</p>
     <p><em>При використанні матеріалів посилання на сайт обов’язкове.</em></p>
   </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const searchInput = document.querySelector('header input[type="text"]');
+      const rows = document.querySelectorAll('tbody tr');
+  
+      searchInput.addEventListener('input', () => {
+        const query = searchInput.value.toLowerCase();
+  
+        rows.forEach(row => {
+          const rowText = row.textContent.toLowerCase();
+          row.style.display = rowText.includes(query) ? '' : 'none';
+        });
+      });
+    });
+  </script>
 
   <script>
     const toggle = document.getElementById('themeToggle');

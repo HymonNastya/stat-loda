@@ -246,21 +246,21 @@
 </head>
 <body>
   <header>
-    <input type="text" placeholder="Пошук..." />
+    <input type="text" placeholder="Щоб почати пошук, введіть запит тут" />
     <div style="display: flex; align-items: center; gap: 16px;">
       <button id="themeToggle" title="Змінити тему">🌓</button>
-      <a href="C:\Users\user\Desktop\stat_main\public\profile.html" title="Особистий профіль">
+      <a href="profile.html" title="Особистий профіль">
         <img src="https://cdn-icons-png.flaticon.com/512/1077/1077063.png" alt="Профіль">
       </a>
     </div>
   </header>
 
   <nav>
-    <a href="C:\Users\user\Desktop\stat_main\public\communities.html">Головна</a>
-    <a href="C:\Users\user\Desktop\stat_main\public\districts.html">Райони</a>
-    <a href="C:\Users\user\Desktop\stat_main\public\districts.html">Громади</a>
-    <a href="C:\Users\user\Desktop\stat_main\public\datasets.html">Набори даних</a>
-    <a href="C:\Users\user\Desktop\stat_main\public\news.html">Новини</a>
+    <a href="communities.html">Головна</a>
+    <a href="districts.html">Райони</a>
+    <a href="districts.html">Громади</a>
+    <a href="datasets.html">Набори даних</a>
+    <a href="news.html">Новини</a>
   </nav>
 
   <h1>Набори відкритих даних</h1>
@@ -306,6 +306,24 @@
     <p><em>При використанні матеріалів посилання на сайт обов’язкове.</em></p>
   </footer>
 
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const searchInput = document.querySelector('header input[type="text"]');
+      const rows = document.querySelectorAll('tbody tr');
+  
+      searchInput.addEventListener('input', () => {
+        const query = searchInput.value.toLowerCase();
+  
+        rows.forEach(row => {
+          const rowText = row.textContent.toLowerCase();
+          row.style.display = rowText.includes(query) ? '' : 'none';
+        });
+      });
+    });
+  </script>
+
+
   <script>
     const toggle = document.getElementById('themeToggle');
     toggle.addEventListener('click', () => {
@@ -318,5 +336,68 @@
       if (saved === 'dark') document.body.classList.add('dark-theme');
     });
   </script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const tbody = document.getElementById('datasets-tbody');
+    const searchInput = document.querySelector('header input[type="text"]');
+
+    // Функція для рендеру наборів даних
+    function renderDatasets(datasets) {
+      tbody.innerHTML = ''; // очищаємо таблицю
+
+      datasets.forEach(dataset => {
+        // Форматована дата
+        const createdAt = dataset.created_at ? new Date(dataset.created_at).toISOString().slice(0,10) : '-';
+
+        // Припустимо, організація у dataset має поле org_name, або можна підкоригувати під твою структуру
+        const orgName = dataset.org_name || '—';
+
+        // Кількість ресурсів (файлів) — або dataset.resources_count (потрібно в API зробити)
+        const resourcesCount = dataset.resources_count || 0;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td data-label="Назва">${dataset.title}</td>
+          <td data-label="Організація">${orgName}</td>
+          <td data-label="Дата створення">${createdAt}</td>
+          <td data-label="Файли"><a href="#" class="link">${resourcesCount} ресурс${resourcesCount === 1 ? '' : 'ів'}</a></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Фільтр таблиці за пошуком
+    function filterTable() {
+      const query = searchInput.value.toLowerCase();
+      const rows = tbody.querySelectorAll('tr');
+
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(query) ? '' : 'none';
+      });
+    }
+
+    // Завантаження даних з API
+    async function loadDatasets() {
+      try {
+        const response = await fetch('/api/datasets');
+        if (!response.ok) throw new Error('Помилка мережі');
+        const data = await response.json();
+
+        renderDatasets(data);
+        filterTable(); // для випадку, якщо вже є текст у полі пошуку
+      } catch (error) {
+        tbody.innerHTML = `<tr><td colspan="4" style="color: #ffea00; text-align:center;">Не вдалося завантажити дані</td></tr>`;
+        console.error('❌ Помилка при завантаженні наборів даних:', error);
+      }
+    }
+
+    searchInput.addEventListener('input', filterTable);
+
+    loadDatasets();
+  });
+</script>
+
 </body>
 </html>

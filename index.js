@@ -95,6 +95,169 @@ const adminRouter = AdminJSExpress.buildAuthenticatedRouter(
   }
 );
 
+app.get('/api/communities', async (req, res) => {
+  try {
+    const communities = await models.Community.findAll({
+      include: {
+        model: models.District,
+        attributes: ['name'], // лише назва району
+      },
+      order: [['name', 'ASC']], // сортування за назвою громади
+    });
+
+    res.json(communities);
+  } catch (error) {
+    console.error('❌ Помилка при отриманні громад:', error);
+    res.status(500).json({ error: 'Не вдалося отримати громади' });
+  }
+});
+
+
+app.get('/api/community/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const community = await models.Community.findByPk(id, {
+      include: {
+        model: models.District,
+        attributes: ['name'],
+      }
+    });
+
+    if (!community) return res.status(404).json({ error: 'Community not found' });
+
+    res.json({
+      id: community.id,
+      name: community.name,
+      area_km2: community.area_km2,
+      num_cities: community.num_cities,
+      num_villages: community.num_villages,
+      num_settlements: community.num_settlements,
+      district: community.district?.name || null
+    });
+  } catch (error) {
+    console.error('❌ Community API error:', error);
+    res.status(500).json({ error: 'Error fetching community data' });
+  }
+});
+
+
+app.get('/api/districts', async (req, res) => {
+  try {
+    const districts = await models.District.findAll({
+      order: [['name', 'ASC']],
+      attributes: [
+        'id',
+        'name',
+        'description',
+        'website_url',
+        'facebook_url',
+        'area_km2',
+        'num_settlements',
+        'num_cities',
+        'num_villages',
+        'num_communities',
+      ],
+    });
+    res.json(districts);
+  } catch (error) {
+    console.error('❌ Помилка при отриманні районів:', error);
+    res.status(500).json({ error: 'Не вдалося отримати райони' });
+  }
+});
+
+// API для одного району по id (опціонально, якщо треба деталізація)
+app.get('/api/district/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const district = await models.District.findByPk(id);
+
+    if (!district) return res.status(404).json({ error: 'District not found' });
+
+    res.json(district);
+  } catch (error) {
+    console.error('❌ Помилка при отриманні району:', error);
+    res.status(500).json({ error: 'Помилка при отриманні району' });
+  }
+});
+
+// API для списку наборів даних (datasets)
+app.get('/api/datasets', async (req, res) => {
+  try {
+    const datasets = await models.Dataset.findAll({
+      order: [['created_at', 'DESC']],
+      attributes: [
+        'id',
+        'title',
+        'notes',
+        'author',
+        'maintainer',
+        'created_at',
+        'updated_at',
+      ],
+      include: [
+        {
+          model: models.Community, // dataset належить громаді
+          attributes: ['id', 'name'],
+          required: false,
+        },
+        {
+          model: models.District, // dataset належить району
+          attributes: ['id', 'name'],
+          required: false,
+        },
+        {
+          model: models.Tag,
+          attributes: ['id', 'name'],
+          through: { attributes: [] }, // Приховати таблицю зв'язку
+          required: false,
+        },
+        {
+          model: models.Group,
+          attributes: ['id', 'name'],
+          through: { attributes: [] },
+          required: false,
+        }
+      ],
+    });
+    res.json(datasets);
+  } catch (error) {
+    console.error('❌ Помилка при отриманні наборів даних:', error);
+    res.status(500).json({ error: 'Не вдалося отримати набори даних' });
+  }
+});
+
+// API для одного набору даних по id (опціонально)
+app.get('/api/dataset/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const dataset = await models.Dataset.findByPk(id, {
+      include: [
+        {
+          model: models.Resource,
+          attributes: ['id', 'name', 'format', 'url', 'size', 'created_at'],
+        },
+        {
+          model: models.Tag,
+          attributes: ['id', 'name'],
+          through: { attributes: [] },
+        },
+        {
+          model: models.Group,
+          attributes: ['id', 'name'],
+          through: { attributes: [] },
+        }
+      ],
+    });
+
+    if (!dataset) return res.status(404).json({ error: 'Dataset not found' });
+
+    res.json(dataset);
+  } catch (error) {
+    console.error('❌ Помилка при отриманні набору даних:', error);
+    res.status(500).json({ error: 'Помилка при отриманні набору даних' });
+  }
+});
+
 app.use(session({
   secret: 'long-secret-password',
   resave: false,
