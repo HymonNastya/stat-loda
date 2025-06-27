@@ -10,7 +10,7 @@ import path from 'path';
 
 const app = express();
 
-// Жорстко прописуємо шлях до папки public
+
 const publicPath = 'C:/Users/user/Desktop/stat_main/public';
 
 const sequelize = new Sequelize('loda', 'myuser', '94654', {
@@ -208,7 +208,7 @@ app.get('/api/datasets', async (req, res) => {
         {
           model: models.Tag,
           attributes: ['id', 'name'],
-          through: { attributes: [] }, // Приховати таблицю зв'язку
+          through: { attributes: [] }, 
           required: false,
         },
         {
@@ -255,6 +255,31 @@ app.get('/api/dataset/:id', async (req, res) => {
   } catch (error) {
     console.error('❌ Помилка при отриманні набору даних:', error);
     res.status(500).json({ error: 'Помилка при отриманні набору даних' });
+  }
+});
+
+app.use(express.json());
+
+app.post('/api/datasets/new', async (req, res) => {
+  try {
+    const { title, notes, author, maintainer, org_id } = req.body;
+    const id = uuidv4();
+
+    await models.Dataset.create({
+      id,
+      title,
+      notes,
+      author,
+      maintainer,
+      org_id,
+      created_at: new Date(),
+      updated_at: new Date()
+    });
+
+    res.status(201).json({ message: 'Dataset created' });
+  } catch (err) {
+    console.error('❌ Помилка при створенні набору:', err);
+    res.status(500).json({ error: 'Помилка сервера' });
   }
 });
 

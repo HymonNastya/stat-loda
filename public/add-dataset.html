@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <title>Додати новий набір</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      padding: 40px 20px 160px;
+      min-height: 100vh;
+    }
+
+    header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      background-color: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(6px);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      margin-bottom: 40px;
+    }
+
+    header a, header button {
+      color: white;
+      font-size: 1.1rem;
+      text-decoration: none;
+      margin-right: 16px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+
+    header a:hover, header button:hover {
+      color: #ffd700;
+    }
+
+    header img {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2px solid white;
+      cursor: pointer;
+      transition: box-shadow 0.3s ease;
+    }
+
+    header img:hover {
+      box-shadow: 0 0 10px 2px #ffd700;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    form {
+      max-width: 600px;
+      margin: 0 auto;
+      background: rgba(255,255,255,0.1);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+      backdrop-filter: blur(6px);
+    }
+
+    label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 10px 15px;
+      margin-bottom: 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    button[type="submit"] {
+      background-color: #fff;
+      color: #333;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 24px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #333;
+      color: white;
+      transform: scale(1.05);
+    }
+
+    .message {
+      text-align: center;
+      margin-top: 20px;
+      font-style: italic;
+      color: #ffd700;
+    }
+
+    .dark-theme {
+      background: #111;
+      color: #eee;
+    }
+
+    .dark-theme form {
+      background: rgba(255,255,255,0.04);
+    }
+
+    .dark-theme input, .dark-theme textarea {
+      background: #222;
+      color: white;
+    }
+
+    .dark-theme header {
+      background-color: rgba(255,255,255,0.05);
+    }
+
+    @media (max-width: 600px) {
+      form {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <a href="datasets.html">← Назад</a>
+    </div>
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <button id="themeToggle" title="Змінити тему">🌓</button>
+      <a href="profile.html" title="Профіль">
+        <img src="https://cdn-icons-png.flaticon.com/512/1077/1077063.png" alt="Профіль">
+      </a>
+    </div>
+  </header>
+
+  <h1>Додати новий набір даних</h1>
+
+  <form id="datasetForm">
+    <label for="title">Назва набору:</label>
+    <input type="text" id="title" name="title" required>
+
+    <label for="notes">Опис:</label>
+    <textarea id="notes" name="notes" required></textarea>
+
+    <label for="author">Автор:</label>
+    <input type="text" id="author" name="author">
+
+    <label for="maintainer">Відповідальна особа:</label>
+    <input type="text" id="maintainer" name="maintainer">
+
+    <label for="org_id">ID організації (громади, ЗОЗ або КП):</label>
+    <input type="text" id="org_id" name="org_id" required>
+
+    <button type="submit">Зберегти</button>
+
+    <div class="message" id="responseMsg"></div>
+  </form>
+
+  <script>
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      document.body.classList.toggle('dark-theme');
+      localStorage.setItem('theme', document.body.classList.contains('dark-theme') ? 'dark' : 'light');
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'dark') document.body.classList.add('dark-theme');
+    });
+
+    document.getElementById('datasetForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const formData = {
+        title: this.title.value,
+        notes: this.notes.value,
+        author: this.author.value,
+        maintainer: this.maintainer.value,
+        org_id: this.org_id.value
+      };
+
+      try {
+        const res = await fetch('/api/datasets/new', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        });
+
+        const msg = document.getElementById('responseMsg');
+        if (res.ok) {
+          msg.textContent = '✅ Набір успішно додано!';
+          this.reset();
+        } else {
+          msg.textContent = '❌ Помилка при збереженні.';
+        }
+      } catch (err) {
+        document.getElementById('responseMsg').textContent = '❌ Помилка з’єднання з сервером.';
+      }
+    });
+  </script>
+</body>
+</html>
